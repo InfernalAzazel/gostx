@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import {spawn} from "child_process";
 
 app.whenReady().then(() => {
+    let childPID = 0
     const win = new BrowserWindow({
         title: 'Main window',
         webPreferences: {
@@ -18,13 +19,10 @@ app.whenReady().then(() => {
         // Load your file
         win.loadFile('dist/index.html');
     }
-    // 主进程接收渲染进程传递信息
-    ipcMain.on('msg', (_, num) => {
-        console.log('渲染进程传递信息 :>> ', num);
-    })
+
     ipcMain.on('run-command', (event, command, args) => {
         const child = spawn(command, args)
-
+        childPID = child.pid
         child.stdout.on('data', (data) => {
             event.reply('command-output', data.toString())
         })
@@ -34,11 +32,14 @@ app.whenReady().then(() => {
         })
 
         child.on('close', (code) => {
+            childPID = 0
             event.reply('command-close', code)
         })
     })
-    setTimeout(() => {
-        // 主进程传递渲染进程
-        win.webContents.send('load', { msg: '初始化完成' })
-    }, 2000);
+    ipcMain.on('get-command-pid', (event, args) => {
+        event.reply('command-close', childPID)
+    })
+    ipcMain.on('command-kill', (event, args) => {
+        process.kill(childPID)
+    })
 })

@@ -1,9 +1,9 @@
-export interface ProxyInterface {
+export interface Proxy {
     id?: number
     name?: string
     cmd?: string
 }
 
-export interface ProxyYamlInterface {
+export interface ProxyYaml {
     proxy?: Proxy []
 }
