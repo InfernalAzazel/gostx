@@ -5,7 +5,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       {
         path: "/proxy",
-        component: () => import( "./views/proxyServer.vue"),
+        component: () => import( "./views/proxy.vue"),
         meta: { title: "代理" }
       },
       {
