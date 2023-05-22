@@ -12,15 +12,16 @@
 </template>
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
+import {useProcessesStore} from "@/store";
 
+const {outputs} = useProcessesStore()!
 const innerRef = ref<HTMLDivElement>();
-const outputs = ref([]);
+
 const nextTick = () => {
   innerRef.value!.scrollTop = innerRef.value!.scrollHeight;
 };
 
 onMounted(async () => {
-  // await kill()
   nextTick();
 
 });

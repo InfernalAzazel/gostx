@@ -12,8 +12,6 @@
       <div class="flex flex-row-reverse">
         <el-button type="primary" @click="onClearLog">清空日志</el-button>
         <div class="w-2"></div>
-        <el-button type="primary">导入配置</el-button>
-        <div class="w-2"></div>
         <el-button type="primary" @click="()=> visible = true">创建服务</el-button>
       </div>
       <div class=" flex justify-center">
@@ -55,7 +53,11 @@
 import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { FormInstance, FormRules } from "element-plus";
+import {useProcessesStore, useProxyStore} from "@/store";
+import {shell} from 'electron'
 
+const {proxy, readProxy, writeProxy } = useProxyStore()!
+const {outputs} = useProcessesStore()!
 const router = useRouter();
 const currentRoute = router.options.routes[0].redirect;
 const children = router.options.routes[0].children;
@@ -82,14 +84,18 @@ const onSelect = (value: string) => {
 };
 
 const onClearLog = () => {
+  outputs.value = []
 };
 
 const onCreateServer = async (formEl: FormInstance | undefined) => {
   if (!formEl) return;
   await formEl.validate(async (valid, fields) => {
     if (valid) {
+      readProxy()
+      proxy.value.push(formInline)
+      writeProxy(proxy.value)
+      readProxy()
       visible.value = false;
-
       console.log("submit!");
     } else {
       console.log("error submit!", fields);
@@ -99,9 +105,10 @@ const onCreateServer = async (formEl: FormInstance | undefined) => {
 };
 const openLink = () => {
   // shell.open('https://github.com/InfernalAzazel/GostForWindow')
+  shell.openExternal('https://github.com')
 };
-onMounted(async () => {
-
+onMounted( () => {
+  readProxy()
 });
 </script>
 <style scoped></style>

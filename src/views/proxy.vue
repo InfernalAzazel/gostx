@@ -1,5 +1,5 @@
 <template>
-    <el-button v-if=" 0 !== -1" type="success" size="small" @click="onStop" plain>ID:  名称:  运行中</el-button>
+    <el-button v-if=" running.id !== -1" type="success" size="small" @click="onStop" plain>ID: {{ running.name }} 名称: {{ running.name }} 运行中</el-button>
     <el-table :data="proxy" style="width: 100%">
         <el-table-column prop="id" label="ID"/>
         <el-table-column prop="name" label="Name"/>
@@ -20,38 +20,26 @@
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref} from "vue";
-import { ipcRenderer } from 'electron'
+import {useProcessesStore, useProxyStore} from "@/store";
+import type {Proxy} from "@/typed";
 
-const proxy = ref([])
-const onDeleteRow = async (index: number) => {
-    // proxy.value.splice(index, 1)
+const {proxy, writeProxy, readProxy} = useProxyStore()!
+const {runCommand, cmdID, kill, running} = useProcessesStore()!
+const onDeleteRow = (index: number) => {
+    proxy.value.splice(index, 1)
+    writeProxy(proxy.value)
+    readProxy()
+    if(cmdID.value === index){
+      kill()
+    }
 }
 
-const onConnect = async (index: number) => {
-    console.log(index)
+const onConnect = (index: number) => {
+    running.value = proxy.value.find(item => item.id === index + 1) as Proxy
+    runCommand(index, running.value.cmd || '')
 }
-const onStop  = async () => {
-
+const onStop  = () => {
+  kill()
 }
-
-// 监听命令的输出
-ipcRenderer.on('command-output', (event, data) => {
-  console.log('Output:', data)
-})
-
-// 监听命令的错误输出
-ipcRenderer.on('command-error', (event, data) => {
-  console.error('Error:', data)
-})
-
-// 监听命令结束
-ipcRenderer.on('command-close', (event, code) => {
-  console.log('Command finished with code', code)
-})
-
-onMounted(()=>{
-  ipcRenderer.send('run-command', 'ls', ['-la'])
-})
 
 </script>

@@ -9,11 +9,21 @@ import Components from 'unplugin-vue-components/vite'
 import {ElementPlusResolver} from "unplugin-vue-components/resolvers";
 
 // https://vitejs.dev/config/
+const isDev = process.env.NODE_ENV === 'development'
+const isProd = process.env.NODE_ENV === 'production'
+
 export default defineConfig({
     plugins: [
         vue(),
         electron({
-            entry: 'electron/main.ts'
+            entry: 'electron/main.ts',
+            vite: {
+                mode: process.env.NODE_ENV,
+                build: {
+                    minify: isProd,
+                    watch: isDev ? {} : null,
+                },
+            },
         }),
         renderer(),
         AutoImport({
