@@ -13,8 +13,9 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
-    "@vueuse/core": "^10.1.2",
-    "element-plus": "^2.3.5",
+    "@vueuse/core": "^8.7.4",
+    "element-plus": "^2.2.28",
+    "element-pro-components": "^1.2.9",
     "js-yaml": "^4.1.0",
     "vue": "^3.3.2",
     "vue-router": "^4.2.0"

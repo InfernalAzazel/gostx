@@ -1,8 +1,15 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, clipboard, Notification } from 'electron'
 import {spawn} from "child_process";
 import * as path from "path";
 import * as fs from 'fs';
 
+const showNotification = () => {
+    const notification = {
+        title: '通知',
+        body: '操作成功'
+    }
+    new Notification(notification).show()
+}
 app.whenReady().then(() => {
     let childPID = 0
     const win = new BrowserWindow({
@@ -17,6 +24,7 @@ app.whenReady().then(() => {
     })
     const userDataPath = app.getPath('userData');
     const filePath = path.join(userDataPath, 'proxy.yaml');
+    console.log(filePath)
     fs.access(filePath, fs.constants.F_OK, (err) => {
         if (err) {
             fs.writeFile(filePath, 'proxy:', (err) => {
@@ -31,8 +39,8 @@ app.whenReady().then(() => {
             console.log('File exists');
         }
     });
-
-    if(process.env.NODE_ENV === 'production'){
+    console.log(process.env.NODE_ENV);
+    if(process.env.NODE_ENV !== 'development'){
         win.setMenuBarVisibility(false)
     }
 
@@ -46,7 +54,8 @@ app.whenReady().then(() => {
 
 
 
-    ipcMain.on('run-command', (event, command, args) => {
+    ipcMain.on('run-command', (event, args) => {
+        const command = path.join(userDataPath, 'gost')
         const child = spawn(command, args)
         childPID = child.pid
         child.stdout.on('data', (data) => {
@@ -56,7 +65,10 @@ app.whenReady().then(() => {
         child.stderr.on('data', (data) => {
             event.reply('command-error', data.toString())
         })
-
+        child.stderr.on('error', (err) => {
+            console.log(err.message)
+            event.reply('command-error', err)
+        })
         child.on('close', (code) => {
             childPID = 0
             event.reply('command-close', code)
@@ -85,5 +97,31 @@ app.whenReady().then(() => {
                 console.log('File written successfully');
             }
         });
+    })
+
+    ipcMain.on('open-file-dialog', async (event) => {
+        const result = await dialog.showOpenDialog({
+            properties: ['openFile']
+        });
+
+        if (result.filePaths.length > 0) {
+            const targetFile = path.join(userDataPath, 'gost');
+            const filePath  = result.filePaths[0];
+            fs.copyFile(filePath, targetFile, (err) => {
+                if (err) {
+                    console.log('Error occurred while copying file: ', err);
+                } else {
+                    console.log('File copied successfully.');
+                }
+            });
+            return filePath;
+        } else {
+            return null;
+        }
+    });
+    ipcMain.on('on-clipboard', (event, args) => {
+        clipboard.writeText(args.toString())
+        console.log('clipboard successfully')
+        showNotification()
     })
 })

@@ -37,13 +37,13 @@ export const [provideProcessesStore, useProcessesStore] = createInjectionState((
     const cmdID = ref(-1)
     const outputs = ref<string[]>([])
     const running = ref<Proxy>({id: -1, name: '', cmd: ''})
-    const runCommand = (id: number, value: string) => {
+    const runCommand = (id: number | undefined, value: string) => {
         if (pid.value !== 0) {
             kill();
         }
         cmdID.value = id
         let args = value.split(" ");
-        ipcRenderer.send('run-command', 'gost', args)
+        ipcRenderer.send('run-command', args)
         // 监听命令的输出
         ipcRenderer.on('command-output', (event, data) => {
             outputs.value.push(data)

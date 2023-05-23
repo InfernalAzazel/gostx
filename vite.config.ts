@@ -7,6 +7,7 @@ import renderer from 'vite-plugin-electron-renderer'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import {ElementPlusResolver} from "unplugin-vue-components/resolvers";
+import {ElementProResolver} from "element-pro-components";
 
 // https://vitejs.dev/config/
 const isDev = process.env.NODE_ENV === 'development'
@@ -30,7 +31,10 @@ export default defineConfig({
             resolvers: [ElementPlusResolver()],
         }),
         Components({
-            resolvers: [ElementPlusResolver()],
+            resolvers: [
+                ElementPlusResolver(),
+                ElementProResolver(),
+            ],
         }),
     ],
     resolve: {

@@ -12,12 +12,14 @@
     "dist-electron"
   ],
   "mac": {
+    "icon": "src/assets/icons/icon.icns",
     "artifactName": "${productName}_${version}.${ext}",
     "target": [
       "dmg"
     ]
   },
   "win": {
+    "icon": "src/assets/icons/icon.ico",
     "target": [
       {
         "target": "nsis",
@@ -27,6 +29,9 @@
       }
     ],
     "artifactName": "${productName}_${version}.${ext}"
+  },
+  "linux": {
+    "icon": "src/assets/icons/"
   },
   "nsis": {
     "oneClick": false,
