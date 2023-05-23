@@ -12,6 +12,19 @@ const showNotification = () => {
 }
 app.whenReady().then(() => {
     let childPID = 0
+    let shName = 'gost'
+    const platform = process.platform;
+    if (platform === 'darwin') {
+        console.log('Running on macOS');
+    } else if (platform === 'win32') {
+        shName = 'gost.exe'
+        console.log('Running on Windows');
+    } else if (platform === 'linux') {
+        shName = 'gost'
+        console.log('Running on Linux');
+    } else {
+        console.log('Unknown platform');
+    }
     const win = new BrowserWindow({
         title: 'gostX',
         width: 1000,
@@ -35,7 +48,6 @@ app.whenReady().then(() => {
                 }
             });
         } else {
-            // The file exists
             console.log('File exists');
         }
     });
@@ -52,22 +64,15 @@ app.whenReady().then(() => {
         win.loadFile('dist/index.html');
     }
 
-
-
     ipcMain.on('run-command', (event, args) => {
-        const command = path.join(userDataPath, 'gost')
+        const command = path.join(userDataPath, shName)
         const child = spawn(command, args)
         childPID = child.pid
         child.stdout.on('data', (data) => {
             event.reply('command-output', data.toString())
         })
-
         child.stderr.on('data', (data) => {
             event.reply('command-error', data.toString())
-        })
-        child.stderr.on('error', (err) => {
-            console.log(err.message)
-            event.reply('command-error', err)
         })
         child.on('close', (code) => {
             childPID = 0
@@ -105,7 +110,7 @@ app.whenReady().then(() => {
         });
 
         if (result.filePaths.length > 0) {
-            const targetFile = path.join(userDataPath, 'gost');
+            const targetFile = path.join(userDataPath, shName);
             const filePath  = result.filePaths[0];
             fs.copyFile(filePath, targetFile, (err) => {
                 if (err) {
