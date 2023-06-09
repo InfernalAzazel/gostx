@@ -1,20 +1,20 @@
 import {createInjectionState} from '@vueuse/core'
-import type {Proxy, ProxyYaml} from "./typed";
+import type {Proxy, SettingYaml} from "./typed";
 import {ref} from "vue";
 import yaml from 'js-yaml';
 import {ipcRenderer} from 'electron'
 
 export const [provideProxyStore, useProxyStore] = createInjectionState((initialValue: Proxy[]) => {
     const proxy = ref(initialValue)
-    const readProxy = () => {
-        let proxyYaml = ''
-        ipcRenderer.send('read-proxy')
-        ipcRenderer.on('read-proxy', (event, data) => {
-            proxyYaml = data as string
-            yaml.loadAll(proxyYaml, (doc: any) => {
+    const gostPath = ref<string | undefined>(undefined)
+    const readSetting = () => {
+        ipcRenderer.send('read-setting')
+        ipcRenderer.on('read-setting', (event, data) => {
+            yaml.loadAll(data, (doc: any) => {
                 if (doc) {
-                    const proxyYamlDoc = doc as ProxyYaml
-                    proxy.value = proxyYamlDoc.proxy?.map((item, index) => {
+                    const settingYamlDoc = doc as SettingYaml
+                    gostPath.value = settingYamlDoc.path!
+                    proxy.value = settingYamlDoc.proxy?.map((item, index) => {
                         return {id: index + 1, ...item}
                     }) || [];
                 }
@@ -22,28 +22,28 @@ export const [provideProxyStore, useProxyStore] = createInjectionState((initialV
         })
 
     }
-    const writeProxy = (value: Proxy[]) => {
-        const result = value.map(({id, ...rest}) => rest)
-        const proxyYaml: ProxyYaml = {proxy: result}
-        const text = yaml.dump(proxyYaml)
-        ipcRenderer.send('write-proxy', text)
+    const writeSetting = () => {
+        const result = proxy.value?.map(({id, ...rest}) => rest)
+        const settingYaml: SettingYaml = {path: gostPath.value, proxy: result}
+        const text = yaml.dump(settingYaml)
+        ipcRenderer.send('write-setting', text)
     }
-    return {proxy, readProxy, writeProxy}
+    return {proxy, gostPath, readSetting, writeSetting}
 })
 
 export const [provideProcessesStore, useProcessesStore] = createInjectionState((initialValue: number) => {
     // state
     const pid = ref(initialValue)
-    const cmdID = ref(-1)
+    const cmdID = ref<number>(-1)
     const outputs = ref<string[]>([])
     const running = ref<Proxy>({id: -1, name: '', cmd: ''})
-    const runCommand = (id: number | undefined, value: string) => {
+    const runCommand = (id: number, command: string | undefined, value: string) => {
         if (pid.value !== 0) {
             kill();
         }
         cmdID.value = id
         let args = value.split(" ");
-        ipcRenderer.send('run-command', args)
+        ipcRenderer.send('run-command',command, args)
         // 监听命令的输出
         ipcRenderer.on('command-output', (event, data) => {
             outputs.value.push(data)
@@ -70,6 +70,8 @@ export const [provideProcessesStore, useProcessesStore] = createInjectionState((
             running.value = {id: -1, name: '', cmd: ''}
         }
         ipcRenderer.send('command-kill', pid.value)
+        pid.value = 0
     }
+
     return {pid, cmdID, running, outputs, runCommand, kill}
 })

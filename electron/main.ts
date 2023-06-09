@@ -12,19 +12,7 @@ const showNotification = () => {
 }
 app.whenReady().then(() => {
     let childPID = 0
-    let shName = 'gost'
-    const platform = process.platform;
-    if (platform === 'darwin') {
-        console.log('Running on macOS');
-    } else if (platform === 'win32') {
-        shName = 'gost.exe'
-        console.log('Running on Windows');
-    } else if (platform === 'linux') {
-        shName = 'gost'
-        console.log('Running on Linux');
-    } else {
-        console.log('Unknown platform');
-    }
+
     const win = new BrowserWindow({
         title: 'gostX',
         width: 1000,
@@ -36,11 +24,12 @@ app.whenReady().then(() => {
         }
     })
     const userDataPath = app.getPath('userData');
-    const filePath = path.join(userDataPath, 'proxy.yaml');
+    const filePath = path.join(userDataPath, 'setting.yaml');
     console.log(filePath)
     fs.access(filePath, fs.constants.F_OK, (err) => {
         if (err) {
-            fs.writeFile(filePath, 'proxy:', (err) => {
+            const setting = 'path:\nproxy:'
+            fs.writeFile(filePath, setting, (err) => {
                 if (err) {
                     console.error('Error creating file:', err);
                 } else {
@@ -51,7 +40,7 @@ app.whenReady().then(() => {
             console.log('File exists');
         }
     });
-    console.log(process.env.NODE_ENV);
+
     if(process.env.NODE_ENV !== 'development'){
         win.setMenuBarVisibility(false)
     }
@@ -64,8 +53,8 @@ app.whenReady().then(() => {
         win.loadFile('dist/index.html');
     }
 
-    ipcMain.on('run-command', (event, args) => {
-        const command = path.join(userDataPath, shName)
+    ipcMain.on('run-command', (event, command, args) => {
+        console.log(command, args)
         const child = spawn(command, args)
         childPID = child.pid
         child.stdout.on('data', (data) => {
@@ -85,16 +74,16 @@ app.whenReady().then(() => {
     ipcMain.on('command-kill', (event, args) => {
         process.kill(childPID)
     })
-    ipcMain.on('read-proxy', (event, args) => {
+    ipcMain.on('read-setting', (event, args) => {
         fs.readFile(filePath, 'utf8', (err, data) => {
             if (err) {
                 console.error('Error reading file:', err)
             } else {
-                event.reply('read-proxy', data)
+                event.reply('read-setting', data)
             }
         })
     })
-    ipcMain.on('write-proxy', (event, args) => {
+    ipcMain.on('write-setting', (event, args) => {
         fs.writeFile(filePath, args, 'utf8', (err) => {
             if (err) {
                 console.error('Error writing file:', err);
@@ -104,15 +93,14 @@ app.whenReady().then(() => {
         });
     })
 
-    ipcMain.on('open-file-dialog', async (event) => {
+    ipcMain.handle('open-file-dialog', async (event) => {
         const result = await dialog.showOpenDialog({
             properties: ['openFile']
         });
 
         if (result.filePaths.length > 0) {
-            const targetFile = path.join(userDataPath, shName);
             const filePath  = result.filePaths[0];
-            fs.copyFile(filePath, targetFile, (err) => {
+            fs.copyFile(filePath, filePath, (err) => {
                 if (err) {
                     console.log('Error occurred while copying file: ', err);
                 } else {
@@ -124,6 +112,7 @@ app.whenReady().then(() => {
             return null;
         }
     });
+
     ipcMain.on('on-clipboard', (event, args) => {
         clipboard.writeText(args.toString())
         console.log('clipboard successfully')

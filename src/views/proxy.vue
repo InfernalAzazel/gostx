@@ -1,21 +1,4 @@
 <template>
-  <!--    <el-table :data="proxy" style="width: 100%">-->
-  <!--        <el-table-column prop="id" label="ID"/>-->
-  <!--        <el-table-column prop="name" label="Name"/>-->
-  <!--        <el-table-column fixed="right" label="Operations">-->
-  <!--            <template #default="scope">-->
-  <!--                <el-button type="warning" size="small" plain @click="onConnect(scope.$index)">连接</el-button>-->
-  <!--                <el-button type="primary" size="small" plain>编辑</el-button>-->
-  <!--                <el-button type="info" size="small" plain @click="onClipboard(scope.$index)">分享</el-button>-->
-  <!--                <el-popconfirm title="你确定要删除这个吗?" @confirm="onDeleteRow(scope.$index)">-->
-  <!--                    <template #reference>-->
-  <!--                        <el-button type="danger" size="small" plain>删除</el-button>-->
-  <!--                    </template>-->
-  <!--                </el-popconfirm>-->
-
-  <!--            </template>-->
-  <!--        </el-table-column>-->
-  <!--    </el-table>-->
   <pro-crud
       v-model="form"
       v-model:search="serachForm"
@@ -36,7 +19,7 @@
           type="success"
           @click="onStop"
       >
-        ID: {{ running.name }} 名称: {{ running.name }} 运行中
+        ID: {{ running.id }} 名称: {{ running.name }} 运行中
       </el-button>
     </template>
     <template #menu="{row ,size }">
@@ -83,25 +66,24 @@ import {
   defineCrudSearch,
   defineCrudSubmit
 } from "element-pro-components";
-import {FormInstance} from "element-plus";
 
-const {proxy, writeProxy, readProxy} = useProxyStore()!
+const {proxy, gostPath, writeSetting, readSetting} = useProxyStore()!
 const {runCommand, cmdID, kill, running} = useProcessesStore()!
 
 const onConnect = (row: Proxy) => {
   running.value = proxy.value.find(item => item.id === row.id) as Proxy
-  runCommand(row.id, running.value.cmd || '')
+  if(running.value.id && running.value.cmd){
+    runCommand(running.value.id, gostPath.value, running.value.cmd)
+  }
 }
 const onStop = () => {
   kill()
 }
-
 const onClipboard = (row: Proxy) => {
   const value = JSON.stringify(proxy.value.find(item => item.id === row.id) as Proxy)
   ipcRenderer.send('on-clipboard', value)
 
 }
-
 
 const form = ref<Proxy>({})
 const serachForm = ref({})
@@ -155,11 +137,11 @@ const columns = defineCrudColumns([
 ])
 
 const createServer = () => {
-  readProxy()
+  readSetting()
   proxy.value.push(form.value)
-  writeProxy(proxy.value)
+  writeSetting()
   setTimeout( () => {
-    readProxy()
+    readSetting()
   }, 500)
 };
 
@@ -170,9 +152,9 @@ const editServer = () => {
     }
     return item;
   });
-  writeProxy(proxy.value)
+  writeSetting()
   setTimeout( () => {
-    readProxy()
+    readSetting()
   }, 500)
 };
 
@@ -210,8 +192,8 @@ const submit = defineCrudSubmit((close, done, type, isValid, invalidFields) => {
 const deleteRow = (row: Proxy) => {
   if (row.id != null) {
     proxy.value.splice(row.id -1, 1)
-    writeProxy(proxy.value)
-    readProxy()
+    writeSetting()
+    readSetting()
     if (cmdID.value === row.id) {
       kill()
     }

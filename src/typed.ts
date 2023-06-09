@@ -4,6 +4,7 @@ export interface Proxy {
     cmd?: string
 }
 
-export interface ProxyYaml {
+export interface SettingYaml {
+    path?: string
     proxy?: Proxy []
 }

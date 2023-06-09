@@ -32,7 +32,7 @@ import { useRouter } from "vue-router";
 import {useProcessesStore, useProxyStore} from "@/store";
 import {ipcRenderer, shell} from 'electron'
 
-const {proxy, readProxy, writeProxy } = useProxyStore()!
+const {gostPath, readSetting, writeSetting} = useProxyStore()!
 const {outputs} = useProcessesStore()!
 const router = useRouter();
 const currentRoute = router.options.routes[0].redirect;
@@ -50,12 +50,16 @@ const openLink = () => {
   shell.openExternal('https://github.com/InfernalAzazel/gostx')
 };
 
-const onSelectFile = () => {
-  ipcRenderer.send('open-file-dialog');
+const onSelectFile = async () => {
+  const path = await ipcRenderer.invoke('open-file-dialog');
+  if(path){
+    gostPath.value = path
+    writeSetting()
+  }
 }
 
 onMounted( () => {
-  readProxy()
+  readSetting()
 });
 </script>
 <style scoped></style>
