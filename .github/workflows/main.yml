@@ -40,6 +40,9 @@ jobs:
         run: |
           npm install
       # step4: build app for mac/win
+      - name: build dist
+        run: |
+          npm run build
       - name: build windows app
         if: matrix.os == 'windows-2019'
         run: |
