@@ -1,85 +1,95 @@
 # main.yml
 
-# Workflow's name
-name: Build Electron App For Win/Mac
+# 工作流的名称
+name: 构建 Electron 应用程序
 
-# Workflow's trigger
+# 触发工作流的事件
 on:
   push:
     tags:
       - 'v*'
 
-# Workflow's jobs
+# 工作流的作业
 jobs:
-  # job's id
+  # 作业的标识符
   release:
-    # job's name
-    name: build and release electron app
+    # 作业的名称
+    name: 构建和发布 Electron 应用程序
 
-    # the type of machine to run the job on
+    # 运行作业的机器类型
     runs-on: ${{ matrix.os }}
 
-    # create a build matrix for jobs
+    # 创建作业的矩阵
     strategy:
       fail-fast: false
       matrix:
         os: [windows-2019, macos-10.15, ubuntu-18.04]
 
-    # create steps
+    # 创建步骤
     steps:
-      # step1: check out repository
-      - name: Check out git repository
+      # 步骤1：检出代码库
+      - name: 检出代码库
         uses: actions/checkout@v3
 
-      # step2: install node env
-      - name: Install Node.js
+      # 步骤2：安装 Node.js
+      - name: 安装 Node.js
         uses: actions/setup-node@v3
 
-      # step3: npm install
-      - name: npm install
+      # 步骤3：安装依赖
+      - name: 安装依赖
         run: |
           npm install
-      # step4: build app for mac/win
-      - name: build windows app
+
+      # 步骤4：为 Mac/Windows 构建应用程序
+      - name: 构建 Windows 应用程序
         if: matrix.os == 'windows-2019'
         run: |
+          # 确保构建命令对于 Windows 正确
           npm run build:electron
-      - name: build mac app
+
+      - name: 构建 macOS 应用程序
         if: matrix.os == 'macos-10.15'
         run: |
+          # 确保构建命令对于 macOS 正确
           npm run build:electron
-      - name: build Ubuntu app
+
+      - name: 构建 Ubuntu 应用程序
         if: matrix.os == 'ubuntu-18.04'
         run: |
+          # 确保构建命令对于 Ubuntu 正确
           npm run build:electron
-      # step5: cleanup artifacts in dist_electron
-      - name: cleanup artifacts for windows
+
+      # 步骤5：清理构建产物到 artifacts 目录
+      - name: 清理 Windows 构建产物
         if: matrix.os == 'windows-2019'
         run: |
           mkdir artifacts
           mv release/**/*.exe artifacts || true
-      - name: cleanup artifacts for macosZ
+
+      - name: 清理 macOS 构建产物
         if: matrix.os == 'macos-10.15'
         run: |
           mkdir artifacts
           mv release/**/*.dmg artifacts || true
-      - name: cleanup artifacts for Ubuntu
+
+      - name: 清理 Ubuntu 构建产物
         if: matrix.os == 'ubuntu-18.04'
         run: |
           mkdir artifacts
-          mv release/**/*.dmg artifacts || true
-      # step6: upload artifacts
-      - name: upload artifacts
+          mv release/**/*.AppImage artifacts || true
+
+      # 步骤6：上传构建产物
+      - name: 上传构建产物
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.os }}
           path: artifacts
 
-      # step7: create release
-      - name: release
+      # 步骤7：创建 Release
+      - name: 创建 Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: 'artifacts/**'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
