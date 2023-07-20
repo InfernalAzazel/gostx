@@ -29,20 +29,17 @@ jobs:
     steps:
       # step1: check out repository
       - name: Check out git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # step2: install node env
       - name: Install Node.js
-        uses: actions/setup-node@v2-beta
+        uses: actions/setup-node@v3
 
       # step3: npm install
       - name: npm install
         run: |
           npm install
       # step4: build app for mac/win
-      - name: build dist
-        run: |
-          npm run build
       - name: build windows app
         if: matrix.os == 'windows-2019'
         run: |
@@ -60,17 +57,17 @@ jobs:
         if: matrix.os == 'windows-2019'
         run: |
           mkdir artifacts
-          mv release/*.exe artifacts || true
+          mv release/**/*.exe artifacts || true
       - name: cleanup artifacts for macosZ
         if: matrix.os == 'macos-10.15'
         run: |
           mkdir artifacts
-          mv release/*.dmg artifacts || true
+          mv release/**/*.dmg artifacts || true
       - name: cleanup artifacts for Ubuntu
         if: matrix.os == 'ubuntu-18.04'
         run: |
           mkdir artifacts
-          mv release/*.dmg artifacts || true
+          mv release/**/*.dmg artifacts || true
       # step6: upload artifacts
       - name: upload artifacts
         uses: actions/upload-artifact@v2
