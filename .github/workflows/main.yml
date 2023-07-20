@@ -3,7 +3,7 @@ name: 构建 Electron 应用程序
 on:
   push:
     tags:
-      - 'v*'
+      - '*'
 
 jobs:
   release:
@@ -32,7 +32,13 @@ jobs:
       - name: 移动构建产物到 artifacts 目录
         run: |
           mkdir -p artifacts
-          mv release/**/*.{{ matrix.os == 'windows-2019' && 'exe' || matrix.os == 'macos-10.15' && 'dmg' || matrix.os == 'ubuntu-18.04' && 'AppImage' }} artifacts || true
+          if [ "${{ matrix.os }}" = "windows-2019" ]; then
+            mv release/**/*.exe artifacts || true
+          elif [ "${{ matrix.os }}" = "macos-10.15" ]; then
+            mv release/**/*.dmg artifacts || true
+          elif [ "${{ matrix.os }}" = "ubuntu-18.04" ]; then
+            mv release/**/*.AppImage artifacts || true
+          fi
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v2
