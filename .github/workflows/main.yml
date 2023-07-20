@@ -7,7 +7,7 @@ name: Build Electron App For Win/Mac
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v*'
 
 # Workflow's jobs
 jobs:
