@@ -29,23 +29,17 @@ jobs:
       - name: 构建应用程序
         run: npm run build:electron
 
-      - name: 显示构建产物内容
-        run: |
-          ls -R release
-
-      - name: 创建 artifacts 目录
-        run: mkdir -p artifacts
-
       - name: 移动构建产物到 artifacts 目录
         run: |
-          if ($env:os -eq "windows-2019" -and Test-Path release/**/*.exe) {
+          mkdir -p artifacts
+          if ($env:os -eq "windows-2019" -and (Get-ChildItem release -Filter "*.exe" -Recurse)) {
             mv release/**/*.exe artifacts
-          } elseif ($env:os -eq "macos-10.15" -and Test-Path release/**/*.dmg) {
+          } elseif ($env:os -eq "macos-10.15" -and (Get-ChildItem release -Filter "*.dmg" -Recurse)) {
             mv release/**/*.dmg artifacts
-          } elseif ($env:os -eq "ubuntu-18.04" -and Test-Path release/**/*.AppImage) {
+          } elseif ($env:os -eq "ubuntu-18.04" -and (Get-ChildItem release -Filter "*.AppImage" -Recurse)) {
             mv release/**/*.AppImage artifacts
           } else {
-            Write-Host "No artifacts found for $env:os"
+            Write-Host "未找到 $env:os 的构建产物"
           }
 
       - name: 显示 artifacts 目录内容
