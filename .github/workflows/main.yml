@@ -3,7 +3,7 @@ name: 构建 Electron 应用程序
 on:
   push:
     tags:
-      - '*'
+      - 'v*'
 
 jobs:
   release:
@@ -29,16 +29,27 @@ jobs:
       - name: 构建应用程序
         run: npm run build:electron
 
+      - name: 显示构建产物内容
+        run: |
+          ls -R release
+
+      - name: 创建 artifacts 目录
+        run: mkdir -p artifacts
+
       - name: 移动构建产物到 artifacts 目录
         run: |
-          mkdir -p artifacts
-          if ($env:os -eq "windows-2019") {
+          if ($env:os -eq "windows-2019" -and Test-Path release/**/*.exe) {
             mv release/**/*.exe artifacts
-          } elseif ($env:os -eq "macos-10.15") {
+          } elseif ($env:os -eq "macos-10.15" -and Test-Path release/**/*.dmg) {
             mv release/**/*.dmg artifacts
-          } elseif ($env:os -eq "ubuntu-18.04") {
+          } elseif ($env:os -eq "ubuntu-18.04" -and Test-Path release/**/*.AppImage) {
             mv release/**/*.AppImage artifacts
+          } else {
+            Write-Host "No artifacts found for $env:os"
           }
+
+      - name: 显示 artifacts 目录内容
+        run: ls artifacts
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v2
