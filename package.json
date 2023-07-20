@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:electron": "tsc && vite build && electron-builder --publish never"
+    "build:electron": "vite build && electron-builder --publish never"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
