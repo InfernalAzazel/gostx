@@ -34,8 +34,11 @@ jobs:
       - name: 构建应用程序
         run: npm run build:electron
 
-      - name: 各系统操作
-        run: python build.workflows.py
+      - name: Create artifacts directory
+        run: mkdir -p artifacts
+
+      - name: Move release files
+        run: mv release/*_*.{exe,dmg,AppImage} artifacts 2>/dev/null
 
       - name: 显示 artifacts 目录内容
         run: ls artifacts
