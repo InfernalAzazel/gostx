@@ -55,8 +55,8 @@ jobs:
         with:
           name: artifacts
           path: |
-            release/**/*windows*.exe
-            release/**/*mac*.dmg
+            release/**/*windows*.*
+            release/**/*mac*.*
             release/**/*linux*.*
           retention-days: 3
 
@@ -73,8 +73,8 @@ jobs:
         uses: softprops/action-gh-release@master
         with:
           token: ${{ secrets.RELEASE_TOKEN }}
-          tag_name: v${{ env.version }}
-          name: Gostx v${{ env.version }}
+          tag_name: v${{ github.ref }}
+          name: Gostx v${{ github.ref }}
           body: See the assets to download this version and install.
           prerelease: false
           generate_release_notes: false
