@@ -11,7 +11,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:electron": "vite build && electron-builder --linux snap --publish never",
+    "build:electron": "vite build && electron-builder --publish never",
+    "build:win:nsis:x64": "vite build && electron-builder --win nsis:x64 --publish never",
+    "build:linux:AppImage": "vite build && electron-builder --linux AppImage --publish never",
     "build:mac:dmg:arm64": "vite build && electron-builder --mac dmg:arm64 --publish never",
     "build:mac:dmg:x64": "vite build && electron-builder --mac dmg:x64 --publish never"
   },
