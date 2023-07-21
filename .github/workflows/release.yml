@@ -27,7 +27,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: artifacts
-          path: release/*_*.{exe,dmg,AppImage}
+          path: release/*_*.*{exe,dmg,AppImage}
           retention-days: 3
 
   release-stage:
