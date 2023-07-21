@@ -1,4 +1,4 @@
-name: 构建 Electron 应用程序
+name: Release CI
 
 on:
   push:
@@ -6,46 +6,47 @@ on:
       - 'v*'
 
 jobs:
-  release:
-    name: 构建和发布 Electron 应用程序
-
+  build-stage:
     runs-on: ${{ matrix.os }}
-
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [ windows-latest, macos-latest, ubuntu-latest ]
 
     steps:
-      - name: 检出代码库
+      - name: check out code
         uses: actions/checkout@v3
 
-      - name: 安装 Node.js
+      - name: Install dependencies
         uses: actions/setup-node@v3
+      - run: npm install
 
-      - name: 安装 Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: 安装依赖
-        run: npm install
-
-      - name: 构建应用程序
+      - name: build the app
         run: npm run build:electron
 
-      - name: Create artifacts directory
-        run: mkdir -p artifacts
-
-      - name: Move release files
-        run: mv release/*_*.{exe,dmg,AppImage} artifacts 2>/dev/null
-
-      - name: 显示 artifacts 目录内容
-        run: ls artifacts
-
-      - name: 创建 Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+      - uses: actions/upload-artifact@v3
         with:
-          token: ${{ secrets.RELEASE_TOKEN }}
+          name: artifacts
+          path: release/*_*.{exe,dmg,AppImage}
+          retention-days: 3
+
+  release-stage:
+    needs: build-stage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v2
+        with:
+          name: artifacts
+          path: artifacts
+      - name: Create Release
+        uses: softprops/action-gh-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.version }}
+          name: Gostx v${{ env.version }}
+          body: See the assets to download this version and install.
+          prerelease: false
+          generate_release_notes: false
           files: 'artifacts/**'
