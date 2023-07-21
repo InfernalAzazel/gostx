@@ -41,15 +41,25 @@ jobs:
         run: sudo apt-get install rpm
 
       - name: build the app
+        if: matrix.os == 'windows-latest' || matrix.os == 'ubuntu-latest'
         run: npm run build:electron
+      - if: matrix.os == 'macos-latest' && matrix.arch == 'x86_64'
+        run: npm run build:mac:dmg:ia32x64
+      - if: matrix.os == 'macos-latest' && matrix.arch == 'aarch64'
+        run: npm run build:mac:dmg:arm64
 
       - name: ls build
-        run: ls -R release/**/**
+        run: ls -R release/**/*windows*.exe
+      - run: ls -R release/**/*linux*.*
+      - run: ls -R release/**/*mac*.dmg
 
       - uses: actions/upload-artifact@v3
         with:
           name: artifacts
-          path: release/**/*_*.*{exe,dmg,AppImage,snap,deb,tar.gz,rpm}
+          path: |
+            release/**/*windows*.exe
+            release/**/*mac*.dmg
+            release/**/*linux*.*
           retention-days: 3
 
   release-stage:

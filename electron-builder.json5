@@ -13,13 +13,14 @@
   ],
   "mac": {
     "icon": "src/assets/icons/icon.icns",
-    "artifactName": "${productName}_${version}_${arch}.${ext}",
+    "artifactName": "${productName}_${version}_mac_${arch}.${ext}",
     "category": "public.app-category.system",
     "target": [
       {
         "target": "dmg",
         "arch": [
-          "armv7l",
+          "ia32",
+          "x64",
           "arm64"
         ]
       },
@@ -27,7 +28,7 @@
   },
   "win": {
     "icon": "src/assets/icons/icon.ico",
-    "artifactName": "${productName}_${version}_${arch}.${ext}",
+    "artifactName": "${productName}_${version}_windows_${arch}.${ext}",
     "target": [
       {
         "target": "nsis",
@@ -36,12 +37,12 @@
           "x64"
         ],
       },
-        {
-            "target": "msi",
-            "arch": [
-              "ia32",
+      {
+        "target": "msi",
+        "arch": [
+          "ia32",
               "x64"
-            ],
+          ],
         },
       {
         "target": "portable",
@@ -54,36 +55,14 @@
   },
   "linux": {
     "icon": "src/assets/icons/",
-    "artifactName": "${productName}_${version}_${arch}.${ext}",
+    "artifactName": "${productName}_${version}_linux_${arch}.${ext}",
     "category": "public.app-category.system",
     "target": [
-      {
-        "target": "AppImage",
-      },
-      {
-        "target": "snap",
-        "arch": [
-          "ia32",
-          "x64"
-        ]
-      },
-      {
-        "target": "deb",
-        "arch": [
-          "ia32",
-          "x64"
-        ]
-      },
-      {
-        "target": "rpm",
-        },
-      {
-        "target": "tar.gz",
-        "arch": [
-          "ia32",
-          "x64"
-        ]
-      }
+      'AppImage',
+      'snap',
+      'deb',
+      'rpm',
+      'tar.gz',
     ],
   },
   "nsis": {
