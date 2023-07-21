@@ -11,7 +11,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-latest, macos-latest, ubuntu-latest ]
+        include:
+          - build: linux
+            os: ubuntu-latest
+            arch: x86_64
+            target: x86_64-unknown-linux-gnu
+          - build: macos
+            os: macos-latest
+            arch: x86_64
+            target: x86_64-apple-darwin
+          - build: macos
+            os: macos-latest
+            arch: aarch64
+            target: aarch64-apple-darwin
+          - build: windows
+            os: windows-latest
+            arch: x86_64
+            target: x86_64-pc-windows-msvc
+
 
     steps:
       - name: check out code
@@ -20,14 +37,19 @@ jobs:
       - name: Install dependencies
         uses: actions/setup-node@v3
       - run: npm install
+      - if : matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install rpm
 
       - name: build the app
         run: npm run build:electron
 
+      - name: ls build
+        run: ls -R release/**/**
+
       - uses: actions/upload-artifact@v3
         with:
           name: artifacts
-          path: release/*_*.*{exe,dmg,AppImage}
+          path: release/**/*_*.*{exe,dmg,AppImage,snap,deb,tar.gz,rpm}
           retention-days: 3
 
   release-stage:

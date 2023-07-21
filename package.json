@@ -3,10 +3,31 @@
   "version": "0.0.1",
   "main": "dist-electron/main.js",
   "private": true,
+  "author": {
+    "name": "kylin",
+    "email": "bluesir.work@qq.com",
+    "url": "https://github.com/InfernalAzazel/gostx.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:electron": "vite build && electron-builder --publish never"
+    "build:electron": "vite build && electron-builder --publish never",
+    "build:win:nsis:ia32": "vite build && electron-builder --windows nsis:ia32 --publish never",
+    "build:win:nsis:x64": "vite build && electron-builder --windows nsis:x64 --publish never",
+    "build:win:msi:ia32": "vite build && electron-builder --windows msi:ia32 --publish never",
+    "build:win:msi:x64": "vite build && electron-builder --windows msi:x64 --publish never",
+    "build:win:portable:ia32": "vite build && electron-builder --windows portable:ia32 --publish never",
+    "build:win:portable:x64": "vite build && electron-builder --windows portable:x64 --publish never",
+    "build:linux:AppImage:ia32x86": "vite build && electron-builder --linux AppImage --publish never",
+    "build:linux:rpm:ia32x64": "vite build && electron-builder --linux rpm --publish never",
+    "build:linux:snap:ia32": "vite build && electron-builder --linux snap:ia32 --publish never",
+    "build:linux:snap:x64": "vite build && electron-builder --linux snap:x64 --publish never",
+    "build:linux:deb:ia32": "vite build && electron-builder --linux deb:ia32 --publish never",
+    "build:linux:deb:x64": "vite build && electron-builder --linux deb:x64 --publish never",
+    "build:linux:tar.gz:ia32": "vite build && electron-builder --linux tar.gz:ia32 --publish never",
+    "build:linux:tar.gz:x64": "vite build && electron-builder --linux tar.gz:x64 --publish never",
+    "build:mac:dmg:armv7l": "vite build && electron-builder --mac dmg:armv7l --publish never",
+    "build:mac:dmg:arm64": "vite build && electron-builder --mac dmg:arm64 --publish never"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
