@@ -13,7 +13,7 @@
     "build": "vite build",
     "build:electron": "vite build && electron-builder --linux snap --publish never",
     "build:mac:dmg:arm64": "vite build && electron-builder --mac dmg:arm64 --publish never",
-    "build:mac:dmg:ia32x64": "vite build && electron-builder --mac dmg:ia32 dmg:x64 --publish never"
+    "build:mac:dmg:x64": "vite build && electron-builder --mac dmg:x64 --publish never"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",

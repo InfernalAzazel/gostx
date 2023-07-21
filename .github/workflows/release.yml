@@ -44,14 +44,12 @@ jobs:
         if: matrix.os == 'windows-latest' || matrix.os == 'ubuntu-latest'
         run: npm run build:electron
       - if: matrix.os == 'macos-latest' && matrix.arch == 'x86_64'
-        run: npm run build:mac:dmg:ia32x64
+        run: npm run build:mac:dmg:x64
       - if: matrix.os == 'macos-latest' && matrix.arch == 'aarch64'
         run: npm run build:mac:dmg:arm64
 
       - name: ls build
-        run: ls -R release/**/*windows*.exe
-      - run: ls -R release/**/*linux*.*
-      - run: ls -R release/**/*mac*.dmg
+        run: ls -R release/**
 
       - uses: actions/upload-artifact@v3
         with:
