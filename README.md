@@ -18,3 +18,8 @@ Gostx 是一个基于 [Gost](https://github.com/go-gost/gost.git) 的代理工�
 
 ![img.png](md_resource/img.png)
 ![img_1.png](md_resource/img_1.png)
+
+
+## 下载
+
+[下载地址](https://github.com/InfernalAzazel/gostx/releases)
