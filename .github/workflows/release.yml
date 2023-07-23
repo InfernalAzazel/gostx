@@ -55,7 +55,8 @@ jobs:
         with:
           name: artifacts
           path: |
-            release/**/*windows*.*
+            release/**/*windows*32*.*
+            release/**/*windows*64*.*
             release/**/*mac*.*
             release/**/*linux*.*
             !release/**/*.blockmap
