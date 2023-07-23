@@ -31,16 +31,14 @@ export const [provideProxyStore, useProxyStore] = createInjectionState((initialV
     return {proxy, gostPath, readSetting, writeSetting}
 })
 
-export const [provideProcessesStore, useProcessesStore] = createInjectionState((initialValue: number) => {
+export const [provideProcessesStore, useProcessesStore] = createInjectionState((initialValue: boolean) => {
     // state
-    const pid = ref(initialValue)
+    const runState = ref<boolean>(initialValue)
     const cmdID = ref<number>(-1)
     const outputs = ref<string[]>([])
+
     const running = ref<Proxy>({id: -1, name: '', cmd: ''})
     const runCommand = (id: number, command: string | undefined, value: string) => {
-        if (pid.value !== 0) {
-            kill();
-        }
         cmdID.value = id
         let args = value.split(" ");
         ipcRenderer.send('run-command',command, args)
@@ -48,19 +46,9 @@ export const [provideProcessesStore, useProcessesStore] = createInjectionState((
         ipcRenderer.on('command-output', (event, data) => {
             outputs.value.push(data)
         })
-
-        // 监听命令的错误输出
-        ipcRenderer.on('command-error', (event, data) => {
-            outputs.value.push(data)
-        })
-
-        // 监听命令结束
-        ipcRenderer.on('command-close', (event, code) => {
-            console.log('Command finished with code', code)
-        })
-        ipcRenderer.send('get-command-pid')
-        ipcRenderer.on('get-command-pid', (event, childPID) => {
-            pid.value = childPID;
+        ipcRenderer.send('get-command-state')
+        ipcRenderer.on('get-command-state', (event, state) => {
+            runState.value = state;
         })
 
     }
@@ -69,9 +57,8 @@ export const [provideProcessesStore, useProcessesStore] = createInjectionState((
             cmdID.value = -1
             running.value = {id: -1, name: '', cmd: ''}
         }
-        ipcRenderer.send('command-kill', pid.value)
-        pid.value = 0
+        ipcRenderer.send('command-kill')
     }
 
-    return {pid, cmdID, running, outputs, runCommand, kill}
+    return {cmdID, running, outputs, runCommand, kill}
 })

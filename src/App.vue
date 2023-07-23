@@ -4,5 +4,5 @@
 <script lang="ts" setup>
 import {provideProxyStore, provideProcessesStore} from "@/store";
 provideProxyStore([])
-provideProcessesStore(0)
+provideProcessesStore(false)
 </script>

@@ -1,7 +1,7 @@
 <template>
   <el-container class="h-screen">
     <el-header class="flex items-center bg-slate-50">
-      <p class="italic text-clip text-3xl text-blue-400">Gost</p>
+      <p class="italic text-clip text-3xl text-blue-400">Gostx</p>
       <div class="flex flex-row-reverse w-full">
         <div class="flex items-center">
           <el-button type="info" icon="Star" @click="openLink" link>关于</el-button>

@@ -1,8 +1,14 @@
 import { app, BrowserWindow, ipcMain, dialog, clipboard, Notification } from 'electron'
+import type {  IpcMainEvent } from 'electron'
 import {spawn} from "child_process";
 import * as path from "path";
 import * as fs from 'fs';
 
+const userDataPath = app.getPath('userData');
+const filePath = path.join(userDataPath, 'setting.yaml');
+
+let childProcess; // 保存子进程对象
+let abortController; // 保存AbortController对象
 const showNotification = () => {
     const notification = {
         title: '通知',
@@ -10,22 +16,7 @@ const showNotification = () => {
     }
     new Notification(notification).show()
 }
-app.whenReady().then(() => {
-    let childPID = 0
-
-    const win = new BrowserWindow({
-        title: 'gostX',
-        width: 1000,
-        height: 800,
-        webPreferences: {
-            contextIsolation: false,
-            nodeIntegration: true,
-            nodeIntegrationInWorker: true,
-        }
-    })
-    const userDataPath = app.getPath('userData');
-    const filePath = path.join(userDataPath, 'setting.yaml');
-    console.log(filePath)
+const ensureSettingFileExists = async () => {
     fs.access(filePath, fs.constants.F_OK, (err) => {
         if (err) {
             const setting = 'path:\nproxy:'
@@ -40,6 +31,42 @@ app.whenReady().then(() => {
             console.log('File exists');
         }
     });
+};
+const runCommand = (event: IpcMainEvent, command, args) => {
+    if (childProcess) {
+        childProcess.kill()
+    }
+    const options = {
+        shell: false,
+        detached: false,
+    };
+    childProcess = spawn(command, args, options as any);
+    childProcess.stdout.on('data', (data) => {
+        event.reply('command-output', data.toString())
+    });
+    childProcess.stderr.on('data', (data) => {
+        event.reply('command-output', data.toString())
+    });
+    childProcess.on('close', (code) => {
+        event.reply('command-close', code)
+    })
+}
+
+
+app.whenReady().then(async () => {
+    let childPID = 0
+
+    const win = new BrowserWindow({
+        title: 'gostX',
+        width: 1000,
+        height: 800,
+        webPreferences: {
+            contextIsolation: false,
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+        }
+    })
+    await ensureSettingFileExists()
 
     if(process.env.NODE_ENV !== 'development'){
         win.setMenuBarVisibility(false)
@@ -47,32 +74,30 @@ app.whenReady().then(() => {
 
     // You can use `process.env.VITE_DEV_SERVER_URL` when the vite command is called `serve`
     if (process.env.VITE_DEV_SERVER_URL) {
-        win.loadURL(process.env.VITE_DEV_SERVER_URL)
+        await win.loadURL(process.env.VITE_DEV_SERVER_URL)
     } else {
         // Load your file
-        win.loadFile('dist/index.html');
+        await win.loadFile('dist/index.html');
     }
 
     ipcMain.on('run-command', (event, command, args) => {
         console.log(command, args)
-        const child = spawn(command, args)
-        childPID = child.pid
-        child.stdout.on('data', (data) => {
-            event.reply('command-output', data.toString())
-        })
-        child.stderr.on('data', (data) => {
-            event.reply('command-error', data.toString())
-        })
-        child.on('close', (code) => {
-            childPID = 0
-            event.reply('command-close', code)
-        })
+        runCommand(event, command, args)
     })
-    ipcMain.on('get-command-pid', (event, args) => {
-        event.reply('get-command-pid', childPID)
+    ipcMain.on('get-command-state', (event, args) => {
+        if (childProcess){
+            event.reply('get-command-state', true)
+        }else {
+            event.reply('get-command-state', true)
+        }
+
     })
     ipcMain.on('command-kill', (event, args) => {
-        process.kill(childPID)
+        if (childProcess) {
+            childProcess.kill()
+            console.log('kill command')
+        }
+        childProcess = null
     })
     ipcMain.on('read-setting', (event, args) => {
         fs.readFile(filePath, 'utf8', (err, data) => {
