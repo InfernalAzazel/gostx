@@ -2,7 +2,7 @@
 
 ## 简介
 
-Gostx 是一个基于 [Gost](https://github.com/go-gost/gost.git) 的代理工具 GUI，它支持操作系统(Windows、Linux、MacOS) 和 gost 多种协议，包括 Socks5、Shadowsocks、ShadowsocksR、Vmess、Trojan、Http、Https 等。
+Gostx 是一个基于 [Gost](https://github.com/go-gost/gost.git) 的代理工具 GUI，它支持操作系统(Windows、Linux、MacOS) 和 gost 多种协议，包括 Socks5、Shadowsocks、ShadowsocksR、Http、Https 等。
 
 
 ## 功能
